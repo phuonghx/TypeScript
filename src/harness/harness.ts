@@ -1208,7 +1208,7 @@ namespace Harness {
             }
 
 
-            const programFileNames = programFiles.map(file => file.unitName);
+            const programFileNames = programFiles.map(file => file.unitName).filter(fileName => !ts.fileExtensionIs(fileName, ts.Extension.Json));
 
             const compilerHost = createCompilerHost(
                 programFiles.concat(otherFiles),

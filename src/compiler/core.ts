@@ -2739,7 +2739,7 @@ namespace ts {
         }
     }
 
-    const extensionsToRemove = [Extension.Dts, Extension.Ts, Extension.Js, Extension.Tsx, Extension.Jsx];
+    const extensionsToRemove = [Extension.Dts, Extension.Ts, Extension.Js, Extension.Tsx, Extension.Jsx, Extension.Json];
     export function removeFileExtension(path: string): string {
         for (const ext of extensionsToRemove) {
             const extensionless = tryRemoveExtension(path, ext);
@@ -3049,6 +3049,10 @@ namespace ts {
     /** True if an extension is one of the supported TypeScript extensions. */
     export function extensionIsTypeScript(ext: Extension): boolean {
         return ext === Extension.Ts || ext === Extension.Tsx || ext === Extension.Dts;
+    }
+
+    export function resolutionExtensionIsTypeScriptOrJson(ext: Extension) {
+        return extensionIsTypeScript(ext) || ext === Extension.Json;
     }
 
     /**
