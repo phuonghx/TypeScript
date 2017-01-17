@@ -1435,6 +1435,10 @@ namespace ts {
         return node && !!(node.flags & NodeFlags.JavaScriptFile);
     }
 
+    export function isInJsonFile(node: Node | undefined): boolean {
+        return node && !!(node.flags & NodeFlags.JsonFile);
+    }
+
     export function isInJSDoc(node: Node | undefined): boolean {
         return node && !!(node.flags & NodeFlags.JSDoc);
     }
