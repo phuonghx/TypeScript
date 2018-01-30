@@ -1043,6 +1043,13 @@ namespace ts {
         });
     }
 
+    export function getTsConfigObjectLiteralExpression(tsConfigSourceFile: TsConfigSourceFile) {
+        if (tsConfigSourceFile && tsConfigSourceFile.statements.length) {
+            const expression = tsConfigSourceFile.statements[0].expression;
+            return isObjectLiteralExpression(expression) && expression;
+        }
+    }
+
     export function getContainingFunction(node: Node): FunctionLike {
         return findAncestor(node.parent, isFunctionLike);
     }
