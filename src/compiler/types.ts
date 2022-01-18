@@ -4153,6 +4153,7 @@ namespace ts {
 
     export interface TypeChecker {
         getTypeOfSymbolAtLocation(symbol: Symbol, node: Node): Type;
+        /* @internal */ getTypeOfSymbol(symbol: Symbol): Type;
         getDeclaredTypeOfSymbol(symbol: Symbol): Type;
         getPropertiesOfType(type: Type): Symbol[];
         getPropertyOfType(type: Type, propertyName: string): Symbol | undefined;
@@ -4162,6 +4163,7 @@ namespace ts {
         getIndexInfosOfType(type: Type): readonly IndexInfo[];
         getSignaturesOfType(type: Type, kind: SignatureKind): readonly Signature[];
         getIndexTypeOfType(type: Type, kind: IndexKind): Type | undefined;
+        /* @internal */ getIndexType(type: Type): Type;
         getBaseTypes(type: InterfaceType): BaseType[];
         getBaseTypeOfLiteralType(type: Type): Type;
         getWidenedType(type: Type): Type;
@@ -6335,7 +6337,7 @@ namespace ts {
         isFilePath?: boolean;                                   // True if option value is a path or fileName
         shortName?: string;                                     // A short mnemonic for convenience - for instance, 'h' can be used in place of 'help'
         description?: DiagnosticMessage;                        // The message describing what the command line switch does.
-        defaultValueDescription?: string | DiagnosticMessage;   // The message describing what the dafault value is. string type is prepared for fixed chosen like "false" which do not need I18n.
+        defaultValueDescription?: string | number | boolean | DiagnosticMessage;   // The message describing what the dafault value is. string type is prepared for fixed chosen like "false" which do not need I18n.
         paramType?: DiagnosticMessage;                          // The name to be used for a non-boolean option's parameter
         isTSConfigOnly?: boolean;                               // True if option can only be specified via tsconfig.json file
         isCommandLineOnly?: boolean;
@@ -6355,23 +6357,25 @@ namespace ts {
     /* @internal */
     export interface CommandLineOptionOfStringType extends CommandLineOptionBase {
         type: "string";
+        defaultValueDescription?: string | undefined | DiagnosticMessage;
     }
 
     /* @internal */
     export interface CommandLineOptionOfNumberType extends CommandLineOptionBase {
         type: "number";
-        defaultValueDescription: `${number | undefined}` | DiagnosticMessage;
+        defaultValueDescription: number | undefined | DiagnosticMessage;
     }
 
     /* @internal */
     export interface CommandLineOptionOfBooleanType extends CommandLineOptionBase {
         type: "boolean";
-        defaultValueDescription: `${boolean | undefined}` | DiagnosticMessage;
+        defaultValueDescription: boolean | undefined | DiagnosticMessage;
     }
 
     /* @internal */
     export interface CommandLineOptionOfCustomType extends CommandLineOptionBase {
         type: ESMap<string, number | string>;  // an object literal mapping named values to actual values
+        defaultValueDescription: number | string | undefined | DiagnosticMessage;
     }
 
     /* @internal */
@@ -7166,7 +7170,7 @@ namespace ts {
         //
 
         createModifier<T extends ModifierSyntaxKind>(kind: T): ModifierToken<T>;
-        createModifiersFromModifierFlags(flags: ModifierFlags): Modifier[];
+        createModifiersFromModifierFlags(flags: ModifierFlags): Modifier[] | undefined;
 
         //
         // Names
@@ -7809,9 +7813,10 @@ namespace ts {
          * Copies only the standard (string-expression) prologue-directives into the target statement-array.
          * @param source origin statements array
          * @param target result statements array
+         * @param statementOffset The offset at which to begin the copy.
          * @param ensureUseStrict boolean determining whether the function need to add prologue-directives
          */
-        /* @internal */ copyStandardPrologue(source: readonly Statement[], target: Push<Statement>, ensureUseStrict?: boolean): number;
+        /* @internal */ copyStandardPrologue(source: readonly Statement[], target: Push<Statement>, statementOffset: number | undefined, ensureUseStrict?: boolean): number;
         /**
          * Copies only the custom prologue-directives into target statement-array.
          * @param source origin statements array
@@ -7838,7 +7843,7 @@ namespace ts {
          * - *DO NOT USE THIS* if a more appropriate function is available.
          */
         /* @internal */ cloneNode<T extends Node | undefined>(node: T): T;
-        /* @internal */ updateModifiers<T extends HasModifiers>(node: T, modifiers: readonly Modifier[] | ModifierFlags): T;
+        /* @internal */ updateModifiers<T extends HasModifiers>(node: T, modifiers: readonly Modifier[] | ModifierFlags | undefined): T;
     }
 
     /* @internal */
@@ -8323,6 +8328,11 @@ namespace ts {
     export interface GetEffectiveTypeRootsHost {
         directoryExists?(directoryName: string): boolean;
         getCurrentDirectory?(): string;
+    }
+
+    /* @internal */
+    export interface HasCurrentDirectory {
+        getCurrentDirectory(): string;
     }
 
     /*@internal*/
